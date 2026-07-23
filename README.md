@@ -10,7 +10,7 @@
 
 ---
 
-## 🌙 Overview
+## 🌙 Overview:
 
 **ComplyGuard** is a decentralized privacy-preserving compliance platform built on the **Midnight Preprod Network**.
 
@@ -18,7 +18,7 @@ Instead of exposing sensitive personal information, users prove their compliance
 
 ---
 
-## ✨ Key Features
+## ✨ Key Features:
 
 🔐 **Zero-Knowledge Compliance Verification**
 - Verify regulatory eligibility without revealing confidential data.
