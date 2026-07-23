@@ -1,15 +1,12 @@
-name: Midnight Compact Compilation Check 
-
+name: Midnight Compact Compilation Check
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-
 jobs:
   compile:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -19,8 +16,13 @@ jobs:
       with:
         node-version: 22
 
-    - name: Compile Compact Contract via Docker
+    - name: Install Compact Toolchain
+      run: |
+        curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+        echo "$HOME/.compact/bin" >> "$GITHUB_PATH"
+
+    - name: Compile Compact Contract
       run: |
         echo "Starting Midnight Toolchain compilation..."
-        docker run --rm -v $(pwd):/workspace -w /workspace midnightnetwork/compact:latest compact compile contract.compact || echo "Compiling..."
-        echo "Level 1 Requirement: Toolchain and compilation check completed
+        compact compile contract.compact managed
+        echo "Level 1 Requirement: Toolchain and compilation check completed"
