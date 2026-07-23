@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --warnOnly",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "repository": {
@@ -28,4 +28,3 @@
     "vite": "^8.1.3"
   }
 }
-
