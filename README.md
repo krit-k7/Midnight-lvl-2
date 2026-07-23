@@ -83,7 +83,7 @@ This provides:
 
 ### 🌐 Frontend
 
-https://midnight-2.vercel.app/
+https://midnight-lvl-2.vercel.app/
 
 ### 📄 Smart Contract
 
