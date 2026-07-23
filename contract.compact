@@ -1,0 +1,16 @@
+pragma language_version >=0.1.0; 
+
+import midnight;
+
+// 1. Ledger State (Halka Açık Durum) Tanımlaması
+export ledger isValidated: Cell<Boolean>;
+
+// 2. Witness (Gizli Kanıt / Özel Veri) Tanımlaması
+export witness assertEligible(): Boolean;
+
+// 3. Circuit (Sıfır Bilgi Kanıtı / ZK Devresi) Tanımlaması
+export circuit verifyUser(): Void {
+    const isEligible: Boolean = assertEligible();
+    check isEligible;
+    isValidated.write(true);
+}

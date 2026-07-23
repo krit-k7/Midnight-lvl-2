@@ -1,0 +1,12 @@
+{ 
+  "contractName": "PrivaCompliance",
+  "circuits": {
+    "verifyUser": {
+      "parameters": [],
+      "returnType": "Void"
+    }
+  },
+  "ledgerState": {
+    "isValidated": "Boolean"
+  }
+}
