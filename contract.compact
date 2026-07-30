@@ -1,16 +1,16 @@
-pragma language_version >=0.1.0; 
+pragma language_version >=0.1.0;
 
-import midnight;
+import CompactStandardLibrary;
 
-// 1. Ledger State (Halka Açık Durum) Tanımlaması
-export ledger isValidated: Cell<Boolean>;
+// 1. Ledger State
+export ledger isValidated: Boolean;
 
-// 2. Witness (Gizli Kanıt / Özel Veri) Tanımlaması
-export witness assertEligible(): Boolean;
+// 2. Witness (private/off-chain proof input)
+witness assertEligible(): Boolean;
 
-// 3. Circuit (Sıfır Bilgi Kanıtı / ZK Devresi) Tanımlaması
-export circuit verifyUser(): Void {
+// 3. Circuit (Zero-Knowledge verification circuit)
+export circuit verifyUser(): [] {
     const isEligible: Boolean = assertEligible();
-    check isEligible;
+    assert(isEligible, "User is not eligible for compliance verification");
     isValidated.write(true);
 }
