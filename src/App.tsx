@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { selectWallet } from './selectWallet';
 
 // --- Inline icons (no icon library added — keeps the dependency footprint unchanged) ---
 
@@ -52,35 +51,10 @@ export default function App() {
   const [proofStatus, setProofStatus] = useState<'idle' | 'generating' | 'success'>('idle');
   const [contractAddress, setContractAddress] = useState<string>('');
   const [copied, setCopied] = useState<CopyTarget>(null);
-  const [walletError, setWalletError] = useState<string>('');
 
-  // Real Lace Wallet Connect / Disconnect logic via the Midnight DApp Connector API
-  const handleWalletConnection = async () => {
-    if (walletConnected) {
-      setWalletConnected(false);
-      setWalletAddress('');
-      setContractAddress('');
-      setProofStatus('idle');
-      return;
-    }
-
-    setWalletError('');
-    try {
-      const wallet = selectWallet();
-      // Use 'preprod' for the public testnet, 'undeployed' for local dev
-      const connectedApi = await wallet.connect('preprod');
-      const { unshieldedAddress } = await connectedApi.getUnshieldedAddress();
-      const status = await connectedApi.getConnectionStatus();
-
-      if (status.status === 'connected') {
-        setWalletConnected(true);
-        setWalletAddress(unshieldedAddress);
-      } else {
-        setWalletError('Wallet did not confirm connection. Please try again.');
-      }
-    } catch (err) {
-      console.error('Wallet connection failed:', err);
-      setWalletError(err instanceof Error ? err.message : 'Wallet connection failed.');
+  // Lace Wallet Connect / Disconnect Mockup Logic
+  const handleWalletConnection = () => {
+@@ -20,6 +65,12 @@ export default function App() {
     }
   };
 
@@ -93,202 +67,283 @@ export default function App() {
   // Run ZK Circuit & Deploy to Preprod
   const executeZKCompliance = async () => {
     if (!walletConnected) return;
-    setIsCompiling(true);
-    setProofStatus('generating');
-
-    // Simulate ZK Proof generation via Midnight.js SDK & DApp Connector
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-
-    setProofStatus('success');
-    setIsCompiling(false);
-    // Verifiable address on Preprod Testnet
+@@ -35,191 +86,187 @@ export default function App() {
     setContractAddress('0xmidnight_compliance_gateway_preprod_active_v2');
   };
 
+  const caseMeta = [
+    { label: 'Network', value: 'Midnight Preprod' },
+    { label: 'Circuit', value: 'Compact ZK · v2' },
+    { label: 'Clearance', value: walletConnected ? 'Subject Identified' : 'Restricted' },
+  ];
+
   return (
     <div
-      className="relative min-h-screen bg-[#050505] text-slate-300 flex flex-col antialiased p-6 overflow-hidden"
+      className="min-h-screen bg-ink text-gray-300 flex flex-col antialiased p-6 md:p-10"
+      className="min-h-screen bg-[#0A0D12] text-slate-300 flex flex-col antialiased p-6"
       style={{
         fontFamily: "'Inter', sans-serif",
+        backgroundImage:
+          'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
+        backgroundSize: '22px 22px',
+          'radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
       }}
     >
-      {/* Ambient Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
-      
-      {/* Subtle Grid Background */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: 'radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)',
-        backgroundSize: '32px 32px',
-      }} />
-
+      {/* Navbar */}
+      <nav className="max-w-6xl w-full mx-auto flex flex-wrap gap-4 justify-between items-center border-b border-panelBorder pb-5 mb-6">
+        <div className="flex items-center gap-4">
+          <div className="h-9 w-9 shrink-0 rounded-sm border border-amberX/40 bg-black/40 flex items-center justify-center">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+              <path
+                d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"
+                stroke="#F5A524"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
       <style>{`
         @keyframes fadeUp {
-          0% { opacity: 0; transform: translateY(12px); }
+          0% { opacity: 0; transform: translateY(6px); }
           100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes barSweep {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(250%); }
         }
-        .fade-up { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        .font-display { font-family: 'Space Grotesk', system-ui, sans-serif; }
+        .fade-up { animation: fadeUp 0.4s ease-out both; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
         .font-data { font-family: 'IBM Plex Mono', monospace; }
-        
-        /* Glassmorphism utility */
-        .glass-panel {
-          background: rgba(255, 255, 255, 0.02);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
       `}</style>
 
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="border border-amberX/30 bg-black/40 rounded-sm px-2 py-1 font-case text-[10px] tracking-[0.15em] text-amberX/80">
+              FILE&nbsp;№&nbsp;074-MN
+            </div>
+            <span className="font-case font-bold text-lg tracking-[0.18em] uppercase text-gray-100">
+              SecureCompliance
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-gray-500 border border-dashed border-gray-700 rounded-full px-2.5 py-1 flex items-center gap-1.5">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  walletConnected ? 'bg-emeraldX animate-pulseSlow' : 'bg-gray-600'
+                }`}
+              />
+              Midnight Preprod
+            </span>
       {/* Navbar */}
-      <nav className="relative z-10 max-w-6xl w-full mx-auto flex justify-between items-center pb-6 mb-12">
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-400/20 to-emerald-500/5 border border-teal-400/30 flex items-center justify-center shadow-[0_0_15px_rgba(45,212,191,0.15)]">
-            <ShieldIcon className="h-5 w-5 text-teal-400" />
+      <nav className="max-w-6xl w-full mx-auto flex justify-between items-center border-b border-white/[0.07] pb-5 mb-12">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-md bg-teal-400/10 border border-teal-400/30 flex items-center justify-center">
+            <ShieldIcon className="h-4 w-4 text-teal-300" />
           </div>
-          <span className="font-display font-semibold text-xl tracking-tight text-white">
+          <span className="font-display font-semibold text-lg tracking-tight text-slate-100">
             ComplyGuard
           </span>
-          <span className="hidden sm:flex items-center gap-2 text-xs font-medium text-teal-200/70 border border-teal-500/20 bg-teal-500/5 rounded-full px-3 py-1.5 ml-2">
-            <span className="h-2 w-2 rounded-full bg-teal-400 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.6)]" />
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-slate-400 border border-white/10 bg-white/[0.03] rounded-full px-2.5 py-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
             Midnight Preprod
           </span>
         </div>
 
         <button
           onClick={handleWalletConnection}
-          className={`flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 ${
+          className={`font-case uppercase tracking-wider text-xs px-5 py-2.5 rounded-sm border-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+          className={`flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg transition-all duration-200 ${
             walletConnected
-              ? 'glass-panel text-slate-300 hover:border-red-500/40 hover:text-red-400 hover:bg-red-500/10'
-              : 'bg-gradient-to-r from-teal-400 to-emerald-500 text-black shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:-translate-y-0.5'
+              ? 'border-roseX/70 text-roseX hover:bg-roseX hover:text-black hover:shadow-glowRose'
+              : 'border-amberX/80 text-amberX hover:bg-amberX hover:text-black hover:shadow-glow'
+              ? 'border border-white/10 text-slate-300 hover:border-red-400/40 hover:text-red-300'
+              : 'bg-teal-400 text-slate-900 hover:bg-teal-300'
           }`}
         >
+          {walletConnected ? 'Terminate Session' : 'Connect Lace Wallet'}
           <WalletIcon className="h-4 w-4" />
           {walletConnected ? 'Disconnect' : 'Connect Lace Wallet'}
         </button>
       </nav>
 
+      {/* Case metadata strip — fills the header/content gap with real context */}
+      <div className="max-w-6xl w-full mx-auto grid grid-cols-3 gap-3 mb-12">
+        {caseMeta.map((item) => (
+          <div
+            key={item.label}
+            className="border border-panelBorder bg-panel/60 rounded-sm px-4 py-3"
+          >
+            <div className="font-case text-[9px] uppercase tracking-[0.2em] text-gray-600 mb-1">
+              {item.label}
+            </div>
+            <div className="font-case text-xs text-gray-300 truncate">{item.value}</div>
+          </div>
+        ))}
+      </div>
+
       {/* Main Content */}
-      <main className="relative z-10 max-w-5xl w-full mx-auto flex-1 flex flex-col items-center justify-center">
+      <main className="max-w-4xl w-full mx-auto flex-1 flex flex-col items-center justify-center pb-12">
+      <main className="max-w-4xl w-full mx-auto flex-1 flex flex-col items-center justify-center">
         {!walletConnected ? (
-          <div className="fade-up relative text-center p-12 glass-panel rounded-3xl w-full max-w-md">
-            <div className="mx-auto mb-8 h-16 w-16 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 border border-white/10 flex items-center justify-center shadow-inner">
-              <LockIcon className="h-7 w-7 text-slate-300" />
+          <div className="relative text-center p-10 bg-panel border border-panelBorder rounded-sm shadow-panel max-w-md w-full overflow-hidden animate-fadeUp">
+            <div className="absolute -right-9 top-7 border-2 border-roseX/60 text-roseX/70 font-case uppercase tracking-[0.25em] text-[9px] px-9 py-1 rotate-[38deg] select-none">
+              Access Restricted
             </div>
 
-            <h2 className="font-display text-2xl font-semibold mb-4 text-white">
-              Wallet Verification
+            <div className="mx-auto mb-5 h-12 w-12 rounded-full border border-amberX/30 bg-black/40 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+                <rect x="5" y="10" width="14" height="9" rx="1.5" stroke="#F5A524" strokeWidth="1.5" />
+                <path d="M8 10V7a4 4 0 118 0v3" stroke="#F5A524" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+          <div className="fade-up relative text-center p-10 bg-[#10141B] border border-white/[0.07] rounded-2xl shadow-2xl max-w-md">
+            <div className="mx-auto mb-6 h-12 w-12 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center">
+              <LockIcon className="h-5 w-5 text-slate-400" />
+            </div>
+
+            <h2 className="font-case uppercase tracking-widest text-base font-bold mb-4 text-gray-100">
+              Subject Verification Locked
+            <h2 className="font-display text-lg font-semibold mb-3 text-slate-100">
+              Wallet verification required
             </h2>
-            <p className="text-sm text-slate-400 mb-10 leading-relaxed px-4">
-              Connect a Lace Wallet configured for the Midnight Preprod network to access this compliance record and run its ZK verification circuit.
+            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+              Connect a Lace Wallet configured to the Midnight Preprod network to open this case
+              file and interact with the ZK compliance circuits.
+            <p className="text-sm text-slate-500 mb-8 leading-relaxed">
+              Connect a Lace Wallet configured for the Midnight Preprod network to access this
+              compliance record and run its ZK verification circuit.
             </p>
-            
             <button
               onClick={handleWalletConnection}
-              className="w-full py-3.5 flex items-center justify-center gap-2 bg-gradient-to-r from-teal-400 to-emerald-500 text-black font-semibold text-base rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:-translate-y-0.5 transition-all duration-300"
+              className="w-full py-3 border-2 border-amberX/80 text-amberX font-case uppercase tracking-wider text-xs rounded-sm hover:bg-amberX hover:text-black hover:shadow-glow transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full py-3 flex items-center justify-center gap-2 bg-teal-400 text-slate-900 font-medium text-sm rounded-lg hover:bg-teal-300 transition-all duration-200"
             >
-              <WalletIcon className="h-5 w-5" />
+              <WalletIcon className="h-4 w-4" />
               Connect Wallet
             </button>
-            
-            {walletError && (
-              <p className="mt-5 text-sm text-red-400 bg-red-500/10 py-2 px-4 rounded-lg border border-red-500/20">
-                {walletError}
-              </p>
-            )}
           </div>
         ) : (
-          <div className="fade-up w-full grid lg:grid-cols-5 gap-6">
-            {/* Left Panel: Status */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="p-6 glass-panel rounded-3xl">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-4">
-                  Connected Wallet
+          <div className="w-full grid md:grid-cols-5 gap-6 animate-fadeUp">
+          <div className="fade-up w-full grid md:grid-cols-5 gap-5">
+            {/* Status Panel */}
+            <div className="md:col-span-2 space-y-4">
+              <div className="group relative p-5 bg-panel border border-panelBorder rounded-sm">
+                <span className="font-case text-[10px] text-gray-500 uppercase tracking-[0.2em] block mb-2">
+                  Subject Wallet —
+            <div className="md:col-span-2 space-y-5">
+              <div className="p-5 bg-[#10141B] border border-white/[0.07] rounded-2xl">
+                <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wide block mb-3">
+                  Connected wallet
                 </span>
-                <div className="flex items-center justify-between gap-3 bg-black/20 p-3.5 rounded-xl border border-white/5">
-                  <span className="font-data text-xs text-slate-300 break-all">{walletAddress}</span>
+                <div className="relative font-case text-xs">
+                  <span className="text-amberX/90 break-all">{walletAddress}</span>
+                  <div className="absolute inset-0 bg-black flex items-center px-1 text-[9px] tracking-[0.25em] text-gray-600 uppercase transition-opacity duration-300 group-hover:opacity-0">
+                    Redacted — hover to reveal
+                  </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-data text-xs text-slate-200 break-all">{walletAddress}</span>
                   <button
                     onClick={() => handleCopy(walletAddress, 'wallet')}
-                    className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-teal-400 hover:border-teal-400/30 hover:bg-teal-400/10 transition-all"
+                    className="shrink-0 h-7 w-7 flex items-center justify-center rounded-md border border-white/10 text-slate-400 hover:text-teal-300 hover:border-teal-400/30 transition-colors"
                     aria-label="Copy wallet address"
                   >
-                    {copied === 'wallet' ? <CheckIcon className="h-4 w-4 text-teal-400" /> : <CopyIcon className="h-4 w-4" />}
+                    {copied === 'wallet' ? <CheckIcon className="h-3.5 w-3.5 text-teal-300" /> : <CopyIcon className="h-3.5 w-3.5" />}
                   </button>
                 </div>
               </div>
 
               {contractAddress && (
-                <div className="fade-up p-6 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/20 rounded-3xl shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
-                      Deployed Contract
+                <div className="relative p-5 bg-emeraldX/5 border border-emeraldX/25 rounded-sm overflow-hidden animate-fadeUp">
+                  <span className="font-case text-[10px] font-bold text-emeraldX uppercase tracking-[0.2em] block mb-2">
+                    Deployed Contract Address
+                  </span>
+                  <code className="text-xs text-emeraldX/90 break-all font-case">
+                    {contractAddress}
+                  </code>
+                  <div className="absolute top-2 right-2 border border-emeraldX/50 text-emeraldX text-[9px] font-case uppercase tracking-widest px-2 py-0.5 rotate-[-4deg]">
+                    ✓ Filed
+                <div className="fade-up p-5 bg-emerald-400/[0.06] border border-emerald-400/25 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] font-medium text-emerald-300 uppercase tracking-wide">
+                      Deployed contract
                     </span>
-                    <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/20 rounded-full px-3 py-1 border border-emerald-500/30">
-                      <CheckIcon className="h-3.5 w-3.5" />
+                    <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-300 bg-emerald-400/10 rounded-full px-2 py-0.5">
+                      <CheckIcon className="h-3 w-3" />
                       Filed
                     </span>
                   </div>
-                  <div className="flex items-center justify-between gap-3 bg-black/20 p-3.5 rounded-xl border border-emerald-500/20">
+                  <div className="flex items-center justify-between gap-2">
                     <code className="font-data text-xs text-emerald-200/90 break-all">
                       {contractAddress}
                     </code>
                     <button
                       onClick={() => handleCopy(contractAddress, 'contract')}
-                      className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 transition-all"
+                      className="shrink-0 h-7 w-7 flex items-center justify-center rounded-md border border-emerald-400/25 text-emerald-300/80 hover:text-emerald-200 transition-colors"
                       aria-label="Copy contract address"
                     >
-                      {copied === 'contract' ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
+                      {copied === 'contract' ? <CheckIcon className="h-3.5 w-3.5" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Right Panel: Circuit */}
-            <div className="lg:col-span-3 p-8 glass-panel rounded-3xl flex flex-col justify-between">
+            {/* Circuit Panel */}
+            <div className="md:col-span-3 p-6 bg-panel border border-panelBorder rounded-sm shadow-panel flex flex-col justify-between">
+            <div className="md:col-span-3 p-6 bg-[#10141B] border border-white/[0.07] rounded-2xl shadow-2xl flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
-                  <div className="h-10 w-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                    <ShieldIcon className="h-5 w-5 text-teal-400" />
-                  </div>
-                  <h3 className="font-display font-semibold text-xl text-white">
+                <div className="flex items-center gap-3 mb-4 pb-4 border-b border-dashed border-panelBorder">
+                  <h3 className="font-case uppercase tracking-widest text-sm font-bold text-gray-100">
                     Verification Circuit
+                <div className="flex items-center gap-2.5 mb-4 pb-4 border-b border-white/[0.07]">
+                  <ShieldIcon className="h-4 w-4 text-teal-300" />
+                  <h3 className="font-display font-semibold text-sm text-slate-100">
+                    Verification circuit
                   </h3>
                 </div>
-                
-                <p className="text-sm text-slate-400 leading-relaxed mb-8">
-                  <strong className="text-slate-200 font-semibold block mb-1">Privacy Claim Execution</strong>
-                  This action runs a local Compact ZK circuit that evaluates user identifiers off-chain. The proof confirms regulatory eligibility to the ledger without exposing the underlying identifying information.
+                <p className="text-xs text-gray-500 leading-relaxed mb-6">
+                  <strong className="text-gray-300">Privacy claim —</strong> this action triggers a
+                  local Compact ZK circuit that evaluates user identifiers off-chain. The proof
+                  verifies strict regulatory eligibility to the ledger without leaking the
+                  underlying identifying information.
+                <p className="text-[13px] text-slate-500 leading-relaxed mb-6">
+                  <strong className="text-slate-300 font-medium">Privacy claim — </strong>
+                  this action runs a local Compact ZK circuit that evaluates user identifiers
+                  off-chain. The proof confirms regulatory eligibility to the ledger without
+                  exposing the underlying identifying information.
                 </p>
 
                 {proofStatus === 'generating' && (
-                  <div className="mb-4 p-5 rounded-2xl bg-teal-500/10 border border-teal-500/20 shadow-inner">
-                    <div className="flex items-center gap-3 text-sm font-semibold text-teal-300 mb-4">
-                      <span className="h-2 w-2 rounded-full bg-teal-400 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.8)]" />
-                      Generating proof &amp; deploying state...
+                  <div className="flex items-center gap-3 font-case text-xs text-amberX bg-amberX/5 p-4 rounded-sm border-l-2 border-amberX/60">
+                    <span className="h-2 w-2 rounded-full bg-amberX animate-ping" />
+                    Processing proof &amp; deploying state to Preprod...
+                  <div className="mb-2 p-4 rounded-xl bg-teal-400/[0.06] border border-teal-400/20">
+                    <div className="flex items-center gap-2.5 text-xs font-medium text-teal-300 mb-3">
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-300 animate-pulse" />
+                      Generating proof &amp; deploying state to Preprod…
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-black/40 overflow-hidden relative">
+                    <div className="h-1 w-full rounded-full bg-white/5 overflow-hidden">
                       <div
-                        className="absolute h-full w-1/3 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400"
-                        style={{ animation: 'barSweep 1.5s ease-in-out infinite' }}
+                        className="h-full w-1/3 rounded-full bg-teal-400"
+                        style={{ animation: 'barSweep 1.1s ease-in-out infinite' }}
                       />
                     </div>
                   </div>
                 )}
 
                 {proofStatus === 'success' && (
-                  <div className="fade-up flex items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 to-transparent border border-emerald-500/20">
-                    <p className="text-sm text-slate-300 leading-relaxed">
-                      State <code className="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-data text-xs mx-1">isValidated = true</code> 
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="text-xs text-gray-500 leading-relaxed max-w-[60%]">
+                      State <code className="text-emeraldX">isValidated = true</code> was
+                      pushed to Preprod without exposing the secret witness.
+                    </div>
+                    <div className="animate-stampIn border-2 border-emeraldX/70 text-emeraldX font-case font-bold uppercase tracking-widest text-xs px-4 py-2 rotate-[-6deg] select-none">
+                      Verified ✓ ZK Proof
+                    </div>
+                  <div className="fade-up flex items-center justify-between gap-4 p-4 rounded-xl bg-emerald-400/[0.06] border border-emerald-400/20">
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      State <code className="text-emerald-300 font-data">isValidated = true</code>{' '}
                       was pushed to Preprod without exposing the secret witness.
                     </p>
-                    <span className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-2">
-                      <CheckIcon className="h-4 w-4" />
+                    <span className="shrink-0 flex items-center gap-1.5 text-xs font-medium text-emerald-300 bg-emerald-400/10 border border-emerald-400/25 rounded-full px-3 py-1.5">
+                      <CheckIcon className="h-3.5 w-3.5" />
                       Verified
                     </span>
                   </div>
@@ -298,9 +353,11 @@ export default function App() {
               <button
                 onClick={executeZKCompliance}
                 disabled={isCompiling}
-                className="w-full mt-8 py-4 flex items-center justify-center gap-2 bg-gradient-to-r from-teal-400 to-emerald-500 text-black font-bold text-sm rounded-xl hover:shadow-[0_0_20px_rgba(45,212,191,0.4)] disabled:opacity-50 disabled:hover:shadow-none disabled:cursor-not-allowed transition-all duration-300"
+                className="w-full mt-6 py-3 border-2 border-amberX/80 text-amberX font-case uppercase tracking-wider text-xs rounded-sm hover:bg-amberX hover:text-black hover:shadow-glow disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-amberX disabled:hover:shadow-none transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full mt-6 py-3 flex items-center justify-center gap-2 bg-teal-400 text-slate-900 font-medium text-sm rounded-lg hover:bg-teal-300 disabled:opacity-40 disabled:hover:bg-teal-400 transition-all duration-200"
               >
-                {isCompiling ? 'Processing Proof...' : 'Verify & Deploy Circuit'}
+                {isCompiling ? 'Processing...' : 'Verify & Deploy Circuit'}
+                {isCompiling ? 'Processing…' : 'Verify & deploy circuit'}
               </button>
             </div>
           </div>
@@ -308,9 +365,9 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 text-center text-xs font-medium tracking-wider text-slate-500 mt-12 pt-6 border-t border-white/10">
-        MIDNIGHT DAPP ARCHITECTURE FRAMEWORK • LEVEL 2 BUILD
+      <footer className="text-center font-case text-[10px] tracking-[0.2em] text-gray-700 mt-auto pt-5 border-t border-dashed border-panelBorder flex items-center justify-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-gray-700 animate-pulseSlow" />
+      <footer className="text-center text-[11px] tracking-wide text-slate-600 mt-12 pt-5 border-t border-white/[0.07]">
+        Midnight dApp Architecture Framework · Level 2 Build
       </footer>
     </div>
-  );
-}
