@@ -1,8 +1,8 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;/* Midnight theme accents */
 @tailwind utilities;
 
+/* Midnight theme */
 html {
   scroll-behavior: smooth;
 }
@@ -12,30 +12,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Midnight theme accents */
+/* Text selection */
 ::selection {
   background: rgba(245, 165, 36, 0.25);
   color: #fef3c7;
 }
 
-/* thin, quiet scrollbar to match the case-file aesthetic */
+/* Thin, quiet scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: #0b0c0e;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #232529;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #2f3238;
 }
 
+/* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
