@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { selectWallet } from './selectWallet';
 
 // --- Inline icons (no icon library added — keeps the dependency footprint unchanged) ---
 
@@ -51,17 +52,35 @@ export default function App() {
   const [proofStatus, setProofStatus] = useState<'idle' | 'generating' | 'success'>('idle');
   const [contractAddress, setContractAddress] = useState<string>('');
   const [copied, setCopied] = useState<CopyTarget>(null);
+  const [walletError, setWalletError] = useState<string>('');
 
-  // Lace Wallet Connect / Disconnect Mockup Logic
-  const handleWalletConnection = () => {
+  // Real Lace Wallet Connect / Disconnect logic via the Midnight DApp Connector API
+  const handleWalletConnection = async () => {
     if (walletConnected) {
       setWalletConnected(false);
       setWalletAddress('');
       setContractAddress('');
       setProofStatus('idle');
-    } else {
-      setWalletConnected(true);
-      setWalletAddress('preprod_mid1qx...7u9z2w');
+      return;
+    }
+
+    setWalletError('');
+    try {
+      const wallet = selectWallet();
+      // Use 'preprod' for the public testnet, 'undeployed' for local dev
+      const connectedApi = await wallet.connect('preprod');
+      const { unshieldedAddress } = await connectedApi.getUnshieldedAddress();
+      const status = await connectedApi.getConnectionStatus();
+
+      if (status.status === 'connected') {
+        setWalletConnected(true);
+        setWalletAddress(unshieldedAddress);
+      } else {
+        setWalletError('Wallet did not confirm connection. Please try again.');
+      }
+    } catch (err) {
+      console.error('Wallet connection failed:', err);
+      setWalletError(err instanceof Error ? err.message : 'Wallet connection failed.');
     }
   };
 
@@ -160,6 +179,9 @@ export default function App() {
               <WalletIcon className="h-4 w-4" />
               Connect Wallet
             </button>
+            {walletError && (
+              <p className="mt-4 text-xs text-red-400 leading-relaxed">{walletError}</p>
+            )}
           </div>
         ) : (
           <div className="fade-up w-full grid md:grid-cols-5 gap-5">
